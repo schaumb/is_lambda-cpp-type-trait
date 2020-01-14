@@ -14,7 +14,15 @@ namespace bxlx {
                 && wholeName.find(':') > wholeName.rfind('('); // This condition filters function pointers/references which returns lambda. 
                 // '(' can be part of filename, but ':' is not. 
 #elif defined(__GNUC__)
-            static_assert(false, "TODO it's harder than I thought first");
+            // at the end <lambda( ... )>, where ... can be anything, but balanced parenthesis
+            if constexpr (wholeName[wholeName.size()-1] != '>' || wholeName[wholeName.size()-2] != ')')
+                return false;
+            
+            std::size_t at = wholeName.size() - 3;
+            for (std::size_t braces{1}; braces; --at)
+                braces += wholeName[at = wholeName.find_last_of("()", at)] == '(' ? -1 : 1;
+            
+            return at >= 6 && wholeName.substr(at-6, 7) == "<lambda";
 #elif defined(_MSC_VER)
             // format: "class <lambda_idchars>"
             return wholeName.rfind("class <lambda_", 0) == 0 && *wholeName.rbegin() == '>';
