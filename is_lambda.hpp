@@ -9,12 +9,11 @@ namespace bxlx {
         constexpr bool is_lambda() {
             constexpr std::string_view wholeName = nameof::nameof_type<T>();
 #if defined(__clang__)
-            // format: "(lambda at filename:line:char)"
+            // format: "(lambda at filename:line:char)", where '(' can be part of filename, but ':' is not.
             return wholeName.rfind("(lambda at ", 0) == 0 && *wholeName.rbegin() == ')' 
                 && wholeName.find(':') > wholeName.rfind('('); // This condition filters function pointers/references which returns lambda. 
-                // '(' can be part of filename, but ':' is not. 
 #elif defined(__GNUC__)
-            // at the end <lambda( ... )>, where ... can be anything, but balanced parenthesis
+            // at the end <lambda( ... )>, where ... can be anything, with balanced parenthesis
             if constexpr (wholeName.size() < 10 || wholeName[wholeName.size()-1] != '>' || wholeName[wholeName.size()-2] != ')')
                 return false;
             
