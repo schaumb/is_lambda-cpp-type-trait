@@ -15,7 +15,7 @@ namespace bxlx {
                 // '(' can be part of filename, but ':' is not. 
 #elif defined(__GNUC__)
             // at the end <lambda( ... )>, where ... can be anything, but balanced parenthesis
-            if constexpr (wholeName[wholeName.size()-1] != '>' || wholeName[wholeName.size()-2] != ')')
+            if constexpr (wholeName.size() < 10 || wholeName[wholeName.size()-1] != '>' || wholeName[wholeName.size()-2] != ')')
                 return false;
             
             std::size_t at = wholeName.size() - 3;
