@@ -1,13 +1,23 @@
 #ifndef BXLX_IS_LAMBDA_INCLUDED_HPP
 #define BXLX_IS_LAMBDA_INCLUDED_HPP
 
-#include "nameof.hpp" // https://raw.githubusercontent.com/Neargye/nameof/master/include/nameof.hpp
+#ifdef USE_BOOST_TYPEINDEX
+#   include <boost/type_index/ctti_type_index.hpp>
+#else
+#   include "nameof.hpp" // https://raw.githubusercontent.com/Neargye/nameof/master/include/nameof.hpp
+#endif
 
 namespace bxlx {
     namespace impl {
         template<typename T>
         constexpr bool is_lambda() {
+#ifdef USE_BOOST_TYPEINDEX
+            constexpr auto ptr = boost::typeindex::ctti_type_index::type_id<T>().name();
+            constexpr std::string_view wholeName {ptr, std::char_traits<char>::length(ptr) - boost::typeindex::detail::ctti_skip_size_at_end};
+#else
             constexpr std::string_view wholeName = nameof::nameof_type<T>();
+#endif
+
 #if defined(__clang__)
             // format: "(lambda at filename:line:char)", where '(' can be part of filename, but ':' is not.
             return wholeName.rfind("(lambda at ", 0) == 0 && *wholeName.rbegin() == ')' 
